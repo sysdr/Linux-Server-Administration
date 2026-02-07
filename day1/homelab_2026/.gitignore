@@ -1,0 +1,41 @@
+# Dependencies and virtual envs
+node_modules/
+venv/
+.venv/
+env/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Vendor and lockfiles (optional; uncomment if you want to ignore)
+# vendor/
+
+# Cache and temp
+*.log
+*.tmp
+tmp/
+.cache/
+*.rr
+
+# Istio / k8s generated
+*istio*
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets (never commit)
+.env.local
+*.pem
+*.key
+.env.*.local

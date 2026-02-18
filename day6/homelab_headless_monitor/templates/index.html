@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Health Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0f0f14; --card: #1a1a22; --accent: #00d4aa; --text: #e4e4e7; --muted: #71717a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.5rem; }
+        h1 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .card { background: var(--card); border-radius: 10px; padding: 1.25rem; border: 1px solid #2a2a35; }
+        .card h2 { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .card .value { font-size: 1.75rem; font-weight: 600; color: var(--accent); }
+        .card .unit { font-size: 0.9rem; color: var(--muted); }
+        .meta { margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+        .error { color: #f87171; }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 50% { opacity: 0.8; } }
+        .about { max-width: 56rem; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--card); border-radius: 10px; border: 1px solid #2a2a35; }
+        .about h2 { font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .about p { font-size: 0.9rem; line-height: 1.5; color: var(--text); margin-bottom: 0.5rem; }
+        .workflow-wrap { max-width: 56rem; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--card); border-radius: 10px; border: 1px solid #2a2a35; overflow: hidden; }
+        .workflow-wrap h2 { font-size: 1rem; color: var(--accent); margin-bottom: 0.75rem; }
+        .workflow-svg { width: 100%; height: auto; display: block; }
+        .workflow-svg .node { fill: #1e1e28; stroke: var(--accent); stroke-width: 1.5; transition: filter 0.2s; }
+        .workflow-svg .node:hover { filter: drop-shadow(0 0 8px rgba(0,212,170,0.4)); }
+        .workflow-svg .node-label,
+        .workflow-svg .node-desc { stroke: none; stroke-width: 0; }
+        .workflow-svg .node-label { fill: var(--accent); font-size: 11px; font-weight: 200; font-family: 'Inter', -apple-system, sans-serif; letter-spacing: 0.04em; }
+        .workflow-svg .node-desc { fill: var(--muted); font-size: 9px; font-weight: 200; font-family: 'Inter', -apple-system, sans-serif; letter-spacing: 0.03em; }
+        .workflow-svg .arrow { stroke: var(--accent); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flow 1.5s linear infinite; }
+        .workflow-svg .arrow-head { fill: var(--accent); }
+        @keyframes flow { to { stroke-dashoffset: -10; } }
+        .workflow-svg rect.node { animation: nodeGlow 2.5s ease-in-out infinite; }
+        @keyframes nodeGlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.9; } }
+    </style>
+</head>
+<body>
+    <h1>System Health Dashboard <span class="pulse">●</span></h1>
+
+    <section class="about">
+        <h2>About this project</h2>
+        <p><strong>Headless</strong> means no GUI: the system runs without a monitor or desktop. That saves resources and reduces attack surface. You interact remotely (SSH or this dashboard) instead of sitting at the machine.</p>
+        <p>This <strong>Health Monitor</strong> collects CPU, memory, disk, and uptime on the host it runs on. You can run it here with <code>start.sh</code> and observe live in this UI, or deploy the same script to a remote VM via SSH and run it on a schedule (e.g. cron) with output to a log file—same idea, different way to observe.</p>
+    </section>
+
+    <section class="workflow-wrap">
+        <h2>How it works</h2>
+        <svg class="workflow-svg" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="arrow-head" points="0 0, 8 3, 0 6"/></marker>
+            </defs>
+            <g class="node">
+                <rect class="node" x="8" y="32" width="92" height="56" rx="6"/>
+                <text class="node-label" x="54" y="55" text-anchor="middle" font-weight="200" stroke="none">You</text>
+                <text class="node-desc" x="54" y="72" text-anchor="middle" font-weight="200" stroke="none">Browser / SSH</text>
+            </g>
+            <path class="arrow" d="M 108 60 L 142 60" marker-end="url(#arrowhead)"/>
+            <g class="node">
+                <rect class="node" x="150" y="32" width="92" height="56" rx="6"/>
+                <text class="node-label" x="196" y="55" text-anchor="middle" font-weight="200" stroke="none">Headless host</text>
+                <text class="node-desc" x="196" y="72" text-anchor="middle" font-weight="200" stroke="none">No GUI</text>
+            </g>
+            <path class="arrow" d="M 250 60 L 284 60" marker-end="url(#arrowhead)"/>
+            <g class="node">
+                <rect class="node" x="292" y="32" width="92" height="56" rx="6"/>
+                <text class="node-label" x="338" y="55" text-anchor="middle" font-weight="200" stroke="none">Health script</text>
+                <text class="node-desc" x="338" y="72" text-anchor="middle" font-weight="200" stroke="none">CPU, RAM, disk</text>
+            </g>
+            <path class="arrow" d="M 392 60 L 426 60" marker-end="url(#arrowhead)"/>
+            <g class="node">
+                <rect class="node" x="434" y="32" width="78" height="56" rx="6"/>
+                <text class="node-label" x="473" y="52" text-anchor="middle" font-weight="200" stroke="none">Observability</text>
+                <text class="node-desc" x="473" y="68" text-anchor="middle" font-weight="200" stroke="none">Dashboard</text>
+                <text class="node-desc" x="473" y="80" text-anchor="middle" font-weight="200" stroke="none">or log file</text>
+            </g>
+        </svg>
+        <p class="meta" style="margin-top:0.5rem;">Setup: <code>setup.sh</code> creates the project; <code>start.sh</code> runs the health script and this dashboard. On a remote VM you could run the script via cron and tail a log file instead.</p>
+    </section>
+
+    <div id="metrics" class="grid"></div>
+    <p class="meta" id="meta">Loading metrics...</p>
+    <script>
+        const el = (id) => document.getElementById(id);
+        function render(data) {
+            if (data.error) {
+                el('metrics').innerHTML = '<p class="error">' + data.error + '</p>';
+                el('meta').textContent = 'Error fetching metrics.';
+                return;
+            }
+            el('metrics').innerHTML = [
+                { label: 'CPU Usage', value: data.cpu_percent, unit: '%' },
+                { label: 'Memory Used', value: data.mem_percent, unit: '%' },
+                { label: 'Memory Used', value: data.mem_used_gb, unit: 'GB' },
+                { label: 'Memory Total', value: data.mem_total_gb, unit: 'GB' },
+                { label: 'Disk Used', value: data.disk_percent, unit: '%' },
+                { label: 'Disk Used', value: data.disk_used_gb, unit: 'GB' },
+                { label: 'Disk Total', value: data.disk_total_gb, unit: 'GB' },
+                { label: 'Uptime', value: data.uptime, unit: '' },
+                { label: 'Hostname', value: data.hostname, unit: '' },
+                { label: 'OS', value: data.os, unit: '' },
+            ].map(({ label, value, unit }) =>
+                '<div class="card"><h2>' + label + '</h2><span class="value">' + value + '</span><span class="unit">' + (unit ? ' ' + unit : '') + '</span></div>'
+            ).join('');
+            el('meta').textContent = 'Last updated: ' + data.timestamp + ' — Host: ' + data.hostname;
+        }
+        function fetchMetrics() {
+            fetch('/api/metrics').then(r => r.json()).then(render).catch(() => render({ error: 'Failed to fetch metrics' }));
+        }
+        fetchMetrics();
+        setInterval(fetchMetrics, 3000);
+    </script>
+</body>
+</html>

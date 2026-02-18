@@ -1,0 +1,44 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node (if used later)
+node_modules/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Project runtime
+.pids/
+*.log
+*.pid
+
+# Env / secrets (do not commit)
+.env
+.env.local
+*.pem
+
+# Istio (if generated)
+istio/
+*istio*
+
+# Docker
+.docker/

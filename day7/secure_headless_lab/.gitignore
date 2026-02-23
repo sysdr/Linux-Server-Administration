@@ -1,0 +1,40 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Project runtime
+.pids/
+status.json
+*.log
+*.bak
+
+# Node (if ever used)
+node_modules/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Istio (if any)
+*istio*

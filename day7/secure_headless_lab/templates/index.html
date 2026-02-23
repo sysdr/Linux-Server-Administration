@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Headless Lab Dashboard</title>
+    <style>
+        :root { --bg: #0f0f14; --card: #1a1a22; --accent: #00d4aa; --text: #e4e4e7; --muted: #71717a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.5rem; }
+        h1 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .card { background: var(--card); border-radius: 10px; padding: 1.25rem; border: 1px solid #2a2a35; }
+        .card h2 { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .card .value { font-size: 1.25rem; font-weight: 600; color: var(--accent); }
+        .meta { margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+        .error { color: #f87171; }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 50% { opacity: 0.8; } }
+    </style>
+</head>
+<body>
+    <h1>Secure Headless Lab Dashboard <span class="pulse">●</span></h1>
+    <div class="meta" style="margin-bottom:1rem; padding:0.75rem; background:var(--card); border-radius:8px; border:1px solid #2a2a35;">
+        <strong>Why http://&lt;VM IP&gt; times out from Windows:</strong> The VM runs inside WSL2. Its IP (e.g. 10.208.78.x) is only reachable from inside WSL2, not from the Windows host. <strong>Use the link below</strong> to view Nginx from your Windows browser.
+    </div>
+    <div id="metrics" class="grid"></div>
+    <p class="meta" id="meta">Loading metrics... Run start.sh to launch the VM and populate real metrics.</p>
+    <p class="meta" id="nginx-link" style="margin-top:0.5rem;"></p>
+    <script>
+        function render(data) {
+            var el = document.getElementById('metrics');
+            var meta = document.getElementById('meta');
+            var nginxLink = document.getElementById('nginx-link');
+            if (!data.vm_ip && !data.timestamp) {
+                el.innerHTML = '<p class="error">No status yet. Run start.sh to launch the real VM and update metrics (no demo/synthetic data).</p>';
+                meta.textContent = 'Run start.sh (requires multipass) then refresh.';
+                nginxLink.innerHTML = '';
+                return;
+            }
+            el.innerHTML = [
+                { label: 'VM Name', value: data.vm_name || '-' },
+                { label: 'VM IP', value: data.vm_ip || '-' },
+                { label: 'Nginx', value: data.nginx_ok ? 'OK' : 'No' },
+                { label: 'UFW', value: data.ufw_ok ? 'OK' : 'No' },
+                { label: 'SSH User', value: data.ssh_ok ? data.ssh_user || 'sysadmin' : '-' },
+                { label: 'Nginx URL', value: data.nginx_url || '-' },
+                { label: 'Last Updated', value: data.timestamp || '-' }
+            ].map(function(x) {
+                return '<div class="card"><h2>' + x.label + '</h2><span class="value">' + x.value + '</span></div>';
+            }).join('');
+            meta.textContent = 'Last updated: ' + (data.timestamp || '-');
+            var base = window.location.origin;
+            nginxLink.innerHTML = 'View VM Nginx from Windows: <a href="' + base + '/nginx" target="_blank" rel="noopener" style="color:var(--accent);">' + base + '/nginx</a>';
+        }
+        function fetchStatus() {
+            fetch('/api/status').then(function(r) { return r.json(); }).then(render).catch(function() { render({}); });
+        }
+        fetchStatus();
+        setInterval(fetchStatus, 3000);
+    </script>
+</body>
+</html>

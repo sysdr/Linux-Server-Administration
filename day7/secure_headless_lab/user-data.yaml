@@ -1,0 +1,19 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - nginx
+  - ufw
+users:
+  - name: sysadmin
+    groups: [sudo, adm]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - REPLACE_WITH_YOUR_SSH_PUBLIC_KEY
+runcmd:
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw --force enable
+  - systemctl enable nginx
+  - systemctl start nginx

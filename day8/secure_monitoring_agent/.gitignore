@@ -1,0 +1,33 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (if ever used)
+node_modules/
+
+# Project runtime
+.pids/
+logs/
+*.log
+
+# Env and secrets (no API keys in repo)
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Istio / k8s local
+*istio*
+*.kubeconfig
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Monitoring Agent Manager — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #faf9f7;
+            --surface: #ffffff;
+            --border: #e8e6e3;
+            --text: #1c1917;
+            --text-muted: #57534e;
+            --accent: #0d9488;
+            --accent-soft: #ccfbf1;
+            --success: #059669;
+            --error: #dc2626;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        .main {
+            max-width: 90rem;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 2rem;
+        }
+        .header {
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .header .badge {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 6px;
+        }
+        .header p { margin-top: 0.35rem; color: var(--text-muted); font-size: 0.95rem; }
+
+        section {
+            max-width: 100%;
+            margin-bottom: 1.75rem;
+        }
+        section h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .about-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+        }
+        .about-box p {
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+        }
+        .about-box p:last-child { margin-bottom: 0; }
+        .about-box strong { color: var(--text); }
+        .about-box code { background: var(--bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.88em; }
+
+        .ops-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1rem;
+        }
+        @media (max-width: 700px) { .ops-row { grid-template-columns: 1fr; } }
+        .ops-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+        }
+        .ops-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .agent-status { font-weight: 600; }
+        .agent-status.running { color: var(--success); }
+        .agent-status.stopped { color: var(--error); }
+        .agent-log {
+            font-family: ui-monospace, monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            max-height: 8rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .metrics-section h2 { margin-bottom: 0.75rem; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 1.15rem 1.25rem;
+            border: 1px solid var(--border);
+        }
+        .card h2 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+        .card .value { font-size: 1.6rem; font-weight: 600; color: var(--accent); }
+        .card .unit { font-size: 0.88rem; color: var(--text-muted); }
+        .meta { margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+        .error { color: var(--error); }
+
+        .workflow-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+        }
+        .workflow-section h2 { margin-bottom: 1rem; }
+        .workflow-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+        .workflow-svg {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            display: block;
+            vertical-align: middle;
+        }
+        .workflow-svg .node-rect { fill: var(--surface); stroke: var(--accent); stroke-width: 2; transition: filter 0.2s; }
+        .workflow-svg .node-rect:hover { filter: drop-shadow(0 0 8px rgba(13, 148, 136, 0.25)); }
+        .workflow-svg .node-label { fill: var(--text); font-size: 11px; font-weight: 600; font-family: 'DM Sans', system-ui, sans-serif; }
+        .workflow-svg .node-desc { fill: var(--text-muted); font-size: 9px; font-family: 'DM Sans', system-ui, sans-serif; }
+        .workflow-svg .arrow-line { stroke: var(--accent); stroke-width: 2; fill: none; stroke-dasharray: 6 4; animation: flow 1.2s linear infinite; }
+        .workflow-svg .arrow-head { fill: var(--accent); }
+        @keyframes flow { to { stroke-dashoffset: -10; } }
+        .workflow-svg .node-rect { animation: nodeGlow 2.5s ease-in-out infinite; }
+        @keyframes nodeGlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.92; } }
+        .workflow-caption { margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+
+        .pulse-dot { animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 50% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+    <main class="main">
+    <header class="header">
+        <h1>Secure Monitoring Agent Manager <span class="badge">Day 8</span></h1>
+        <p>Operational logic and state-aware automation for the monitoring agent. Idempotent setup and live observability.</p>
+    </header>
+
+    <section class="about">
+        <h2>About this application</h2>
+        <div class="about-box">
+            <p>This application is a <strong>Secure Monitoring Agent Manager</strong>: a small background agent that periodically logs heartbeats, plus a manager script that ensures the agent is installed and running in a repeatable, safe way.</p>
+            <p>The manager script follows <strong>idempotency</strong>: you can run it multiple times and the result is the same (no duplicate users, no overwritten configs). It is <strong>state-aware</strong>: it checks whether the agent is already running before starting it, similar to a control loop that reconciles current state with desired state.</p>
+            <p>You run <code>start.sh</code> to bring up the agent and this dashboard; <code>stop.sh</code> stops both. The dashboard shows live system metrics and the latest agent log lines so you can see the application in operation.</p>
+        </div>
+    </section>
+
+    <section class="operations">
+        <h2>Live operations</h2>
+        <div class="ops-row">
+            <div class="ops-card">
+                <h3>Agent status</h3>
+                <p class="agent-status" id="agent-status">Checking…</p>
+                <p class="meta" id="agent-meta"></p>
+            </div>
+            <div class="ops-card">
+                <h3>Latest agent log (heartbeats)</h3>
+                <pre class="agent-log" id="agent-log">—</pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="metrics-section">
+        <h2>System metrics (this host)</h2>
+        <div id="metrics" class="grid"></div>
+        <p class="meta" id="meta">Loading metrics…</p>
+    </section>
+
+    <section class="workflow-section">
+        <h2>Application workflow</h2>
+        <p class="workflow-caption">End-to-end flow of the application: from starting the manager script to the agent running and being observed here.</p>
+        <div class="workflow-wrap">
+            <svg class="workflow-svg" viewBox="0 0 760 160" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="arrow-head" points="0 0, 8 3, 0 6"/></marker>
+                </defs>
+                <!-- Start -->
+                <g class="node">
+                    <rect class="node-rect" x="8" y="44" width="88" height="72" rx="8"/>
+                    <text class="node-label" x="52" y="78" text-anchor="middle">Start</text>
+                    <text class="node-desc" x="52" y="98" text-anchor="middle">run start.sh</text>
+                </g>
+                <path class="arrow-line" d="M 104 80 L 138 80" marker-end="url(#arrowhead)"/>
+                <!-- Dependencies -->
+                <g class="node">
+                    <rect class="node-rect" x="146" y="44" width="88" height="72" rx="8"/>
+                    <text class="node-label" x="190" y="78" text-anchor="middle">Dependencies</text>
+                    <text class="node-desc" x="190" y="98" text-anchor="middle">commands exist</text>
+                </g>
+                <path class="arrow-line" d="M 242 80 L 276 80" marker-end="url(#arrowhead)"/>
+                <!-- Idempotent setup -->
+                <g class="node">
+                    <rect class="node-rect" x="284" y="32" width="100" height="96" rx="8"/>
+                    <text class="node-label" x="334" y="62" text-anchor="middle">Idempotent</text>
+                    <text class="node-label" x="334" y="78" text-anchor="middle">setup</text>
+                    <text class="node-desc" x="334" y="98" text-anchor="middle">user → log dir</text>
+                    <text class="node-desc" x="334" y="112" text-anchor="middle">→ agent script</text>
+                </g>
+                <path class="arrow-line" d="M 392 80 L 426 80" marker-end="url(#arrowhead)"/>
+                <!-- State check -->
+                <g class="node">
+                    <rect class="node-rect" x="434" y="44" width="88" height="72" rx="8"/>
+                    <text class="node-label" x="478" y="78" text-anchor="middle">State check</text>
+                    <text class="node-desc" x="478" y="98" text-anchor="middle">agent running?</text>
+                </g>
+                <path class="arrow-line" d="M 530 80 L 564 80" marker-end="url(#arrowhead)"/>
+                <!-- Agent running -->
+                <g class="node">
+                    <rect class="node-rect" x="572" y="44" width="68" height="72" rx="8"/>
+                    <text class="node-label" x="606" y="72" text-anchor="middle">Agent</text>
+                    <text class="node-label" x="606" y="88" text-anchor="middle">running</text>
+                    <text class="node-desc" x="606" y="106" text-anchor="middle">heartbeat</text>
+                </g>
+                <path class="arrow-line" d="M 648 80 L 676 80" marker-end="url(#arrowhead)"/>
+                <!-- Observability: wider box so "Dashboard" fits -->
+                <g class="node">
+                    <rect class="node-rect" x="684" y="32" width="76" height="96" rx="8"/>
+                    <text class="node-label" x="722" y="58" text-anchor="middle">Log</text>
+                    <text class="node-desc" x="722" y="74" text-anchor="middle">+</text>
+                    <text class="node-label" x="722" y="92" text-anchor="middle">Dashboard</text>
+                    <text class="node-desc" x="722" y="108" text-anchor="middle">(this UI)</text>
+                </g>
+            </svg>
+        </div>
+    </section>
+
+    <script>
+        const el = (id) => document.getElementById(id);
+        function renderMetrics(data) {
+            if (data.error) {
+                el('metrics').innerHTML = '<p class="error">' + data.error + '</p>';
+                el('meta').textContent = 'Error fetching metrics.';
+                return;
+            }
+            el('metrics').innerHTML = [
+                { label: 'CPU usage', value: data.cpu_percent, unit: '%' },
+                { label: 'Memory used', value: data.mem_percent, unit: '%' },
+                { label: 'Memory used', value: data.mem_used_gb, unit: 'GB' },
+                { label: 'Memory total', value: data.mem_total_gb, unit: 'GB' },
+                { label: 'Disk used', value: data.disk_percent, unit: '%' },
+                { label: 'Disk used', value: data.disk_used_gb, unit: 'GB' },
+                { label: 'Disk total', value: data.disk_total_gb, unit: 'GB' },
+                { label: 'Uptime', value: data.uptime, unit: '' },
+                { label: 'Hostname', value: data.hostname, unit: '' },
+                { label: 'OS', value: data.os, unit: '' },
+            ].map(({ label, value, unit }) =>
+                '<div class="card"><h2>' + label + '</h2><span class="value">' + value + '</span><span class="unit">' + (unit ? ' ' + unit : '') + '</span></div>'
+            ).join('');
+            el('meta').textContent = 'Last updated: ' + data.timestamp + ' — ' + data.hostname;
+        }
+        function fetchMetrics() {
+            fetch('/api/metrics').then(r => r.json()).then(renderMetrics).catch(() => renderMetrics({ error: 'Failed to fetch metrics' }));
+        }
+        function updateAgentStatus() {
+            fetch('/api/agent_status').then(r => r.json()).then(function (d) {
+                const statusEl = el('agent-status');
+                statusEl.textContent = d.running ? 'Running' : 'Not running';
+                statusEl.className = 'agent-status ' + (d.running ? 'running' : 'stopped');
+                el('agent-meta').textContent = d.message || (d.running ? 'Heartbeats below' : '');
+                el('agent-log').textContent = d.lines && d.lines.length ? d.lines.join('\n') : (d.message || '—');
+            }).catch(function () {
+                el('agent-status').textContent = 'Unknown';
+                el('agent-status').className = 'agent-status';
+                el('agent-log').textContent = 'Could not fetch agent status.';
+            });
+        }
+        fetchMetrics();
+        updateAgentStatus();
+        setInterval(fetchMetrics, 3000);
+        setInterval(updateAgentStatus, 4000);
+    </script>
+    </main>
+</body>
+</html>
